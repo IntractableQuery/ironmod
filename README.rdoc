@@ -1,0 +1,19 @@
+== About
+IronMod is the result of not having a job in the summer of 2008.  It has two components:
+* The hideous game library interception code, which is largely generated from a behemoth Perl script and various SWIG configurations.  I'm probably obligated to offer it under the GPL since it does have Quake 2 code integrated all over the place, mostly from DP's own code (which for its game library, is funnily enough left closed source!).  So, if you want the code, just contact me.
+* The Lua code base.  This is all hand-written and some of it is pretty neat.  If you're interested in how Quake 2 or DP works, the code documentation is worth a read.  It includes code for negotiating with DP's login server to validate players.
+
+As an added bonus, you will find an SNTP client implementation in lib/luasntp.
+
+== Why it's dead
+IronMod was fun to develop and was my first major C/Lua project.  That said, it is not a legitimate way to expand on DP's functionality.  Yes, it has a lot of powerful and useful features that could benefit DP hugely, but it replicates a lot of game logic that is hidden away in DP's own game library (e.g. gamei386.so).  Jitspoe has elected to keep this code closed-source, claiming that parts of it are copyrighted by people he can't contact anymore.  However, I can guarantee he's still integrating GPL'd code in to the library (at least the shared headers), so there's a clear conflict there.  In any case, IronMod became far too difficult to debug.  It did turn up some bugs in DP, which were fun to find and report (or in many cases, fix using Lua alone), but it is simply not worth the time investment to do something that would be far easier to do with Jitspoe's support.  As it is, the code is here for you to learn from.  NS2's use of Lua really inspired me, and I hope to see Lua used in more games in the future, especially with great projects like Lua JIT. 
+
+== A word of warning
+Jitspoe maintains his own cheat detection system.  I don't keep up much with what's going on with that, but he may decide to have servers report themselves if they are running modified game libraries (unlikely, though).  Don't blame me if you get banned.  Also, please don't use ironmod to make jump servers :)
+
+General folder information:
+plugins/ - a location for plugins storage (does not necessarily always get used, as it can be changed)
+core/ - standard ironmod-specific lua scripts
+lib/ - platform-dependent dll/so files which may be loaded by scripts (Lua script note: this directory becomes a package.cpath directory)
+plugins/ - plugins directory
+bin/ - You'll need the library and instructions here if you want to try to use ironmod
