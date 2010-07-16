@@ -1,0 +1,3 @@
+"Intellectual property" is an oxymoron.
+All ztact software is public domain.
+lua@ztact.com

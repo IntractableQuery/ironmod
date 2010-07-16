@@ -1,0 +1,22 @@
+=->IronMod Lua [PLUG:server] Debug:  == > GIDP_CONFIGSTRING NOSTORE 	 ��iron�ffist�9
+[15:35:20] ironfist connected [192.168.0.6:14080]
+=->IronMod Lua [PLUG:server] Debug:  == > GE_CLIENTCONNECT
+=->IronMod Lua [PLUG:server] Debug:  == > GE_CLIENTCONNECT RESETTING CACHE VALUES
+=->IronMod Lua [PLUG:testing] Debug: GE_CLIENTUSERINFOCHANGED	 \spectator\0\build\21\password\tk\hand\0\name\��iron�ffist\skin\male/pb2p\rate\25000\msg\2\fov\fggfd\gender\XXX\ip\192.168.0.6:14080
+=->IronMod Lua [PLUG:server] Debug:  == > GIDP_CONFIGSTRING ALREADYSTORED 	 ��iron�ffist�9
+[15:35:23] ironfist connected [192.168.0.6:14080]
+=->IronMod Lua [PLUG:server] Debug:  == > GE_CLIENTCONNECT
+=->IronMod Lua [PLUG:server] WARNING: expected player_name_cache to have a value
+PANIC: unprotected error in call to Lua API (.../paintball2/ironmod/plugins/server/plugin_server.lua:1672: BLARGH DIE)
+ds@tau:~/paintball2$ 
+
+1) CONFIGSTRINGS come through with our info
+2) Client connects
+3) Configstrings come again, because client is reconnecting during the connection (it NEVER makes a disconnect), but it already has the player, so it just changes their info
+4) Client connects, but no cache info since we thought the player only changed their name
+
+MAJOR WARNING: make sure that cache values can't get mixed up for other players?
+the solution seems to be that we just need to check to see if a player with
+that ip/port are already on the server... if so, we just inherit or use
+the existing player... now, we really need to consider handling caches though,
+since two players can probably mess it up

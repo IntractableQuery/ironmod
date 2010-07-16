@@ -1,0 +1,275 @@
+DPBINLOG, version 1
+All data types are big-endian
+This logging format is designed for producing server statistics
+
+********************************************************************************
+All logged events have the following form:
+<uint32: sequence> <uint16: length> <uint32: timestamp> 
+    ... <byte: game event> [additional data]
+
+The sequence begins at 0 at the start of the logging session and is incremented 
+for every event. This number, when combined with the timestamp and event (and
+if you want to be even more precise, the length), provides a fairly unique 
+identifier for this event. This uniqueness is important, since the log format
+is supposed to allow you to search for specific entries for differential log
+transfers between a server and a log repository. The length field contains the
+number of bytes that will be found after the timestamp and game event fields.
+This way, it is possible to add new events (for new DPBINLOG versions) which
+old parsers can just skip over if they aren't familiar with them. 
+
+The timestamp usually will correspond to a unix timestamp (not guaranteed) 
+expressing the time of the event with seconds precision (seconds-only precision
+is guaranteed). In most cases, the timestamp is merely there to establish some 
+idea of the time elapsed between events, and not necessarily a good indicator
+of the server's true local time (although in current implementations, the
+server's local time is used).
+
+In order to encourage backwards-compatability with older log versions, events 
+are to NEVER be modified, they may only be added or deprecated (marked unused).
+The length field allows you to skip over game events that are unrecognized,
+or for the sake of ease, skip over game events you've not implemented parsing
+for.
+
+The following is a description of game events and the data that follows them
+(if any). Note that the type "cstring" is a null-terminated string (byte value
+0). The variable TeamNum represents team names as 1=red, 2=blue, 3=purple, 
+4=yellow, 0=none(assume observer).
+
+********************************************************************************
+EVENT: LE_LOGSTART, 0x00
+Takes place when logging is first initialized. This is a bit vague, but it's
+accurate. It may be when the server first starts up, or it may just be the
+ironmod stats plugin getting reloaded.
+ARGUMENTS: 
+    uint16 LogVersion (the log version that will be used for the following
+                       events)
+    byte UseTimesync (this will be set to 1 if the following SyncStamp and
+                      TimeSyncServer fields are being used. if 0, then
+                      no time synchronization was performed and you should
+                      ignore those two fields.)
+    uint32 SyncStamp (this is a special time expressed in seconds which is 
+                     obtained from a remote server. this makes it possible
+                     for remote systems which may take your uploaded logs
+                     to determine the time that your logs started without
+                     worrying about your local server time. this is a unix
+                     timestamp value. it will probably come from an SNTP 
+                     server.)
+    cstring TimeSyncServer (this is the url of the remote time server
+                            that was used for the TimeSync. SNTP is the
+                            desired time service, although you're free
+                            to implement your own, as long as the parser
+                            can understand it. example: "SNTP://time-a.nist.gov")
+
+EVENT: LE_PLAYER_CONNECT, 0x01
+A player has connected to the server. This is used to establish a player id 
+to use in future player-related events and provide you with their initial
+userinfo. Be aware that it is possible to get a LE_PLAYER_CONNECT but never
+receive a LE_PLAYER_BEGIN or LE_PLAYER_DISCONNECT afterwards.
+ARGUMENTS:     
+    uint32 IP (client IPv4 address; if anonymizing logs, use 0.0.0.0)
+    uint16 Port (client port; if anonymizing logs, use 0)
+    byte PlayerNum (a number used hereafter to refer to this specific client;
+                      this corresponds directly to their player number in-game
+                      as seen by the server's "players" command)
+    cstring UserInfo (userinfo as seen from client; be aware the client can
+                      fake/omit any of this, and it should not be used for 
+                      anything important beside trivial statistics. if 
+                      anonymizing logs, you should strip or modify the 
+                      client's address information)
+
+EVENT: LE_PLAYER_BEGIN, 0x02
+A player has entered the game (you may presume they are actually viewable by
+other players and are on a team).
+ARGUMENTS:
+    byte PlayerNum
+    byte TeamNum
+    cstring PlayerName (player's current name)
+    
+EVENT: LE_PLAYER_DISCONNECT, 0x03
+A player has disconnected from the server.
+ARGUMENTS:
+    byte PlayerNum
+    
+EVENT: LE_PLAYER_JOINTEAM, 0x04
+A player has joined a new team.
+ARGUMENTS:
+    byte PlayerNum
+    byte TeamNum (the team this player is joining -- you are to infer the 
+                  previous team)  
+                  
+EVENT: LE_ROUNDOVER, 0x05
+The current game round has ended.
+ARGUMENTS: NONE
+
+EVENT: LE_OVERTIME, 0x06
+Overtime has begun. Todo: confirm this is the *start* of overtime?
+ARGUMENTS: NONE
+
+EVENT: LE_ROUNDSTART, 0x07
+A new game round has begun.
+ARGUMENTS: NONE
+
+EVENT: LE_ADMINKILL, 0x08
+A player has been killed by a server administrator. For example, an admin might
+use the "viewgib" command against a player.
+ARGUMENTS:
+    byte PlayerNum (the player who was killed)
+    byte WasAdmin (if the administrator was a player in the game that was 
+                   properly identified by the logging system, then this will
+                   be 1, which means the following AdminNum argument will be
+                   valid. if the administrator could not be determined, then
+                   this will be 0 and the following AdminNum argument should 
+                   be ignored.)
+    byte AdminNum (only used if WasAdmin=1, otherwise it will still be here,
+                   but you should ignore it)
+
+EVENT: LE_KILL, 0x09
+Occurs when one player eliminates another player of the opposite team.
+ARGUMENTS:
+    byte KillerPlayerNum (the player who performed the elimination)
+    byte VictimPlayerNum (the player who was eliminated)
+    byte KillerWepNum (0=unknown(shouldn't happen), 1=PGP, 2=Trracer, 
+                       3=Stingray, 4=VM-68, 5=Spyder, 6=Carbine, 7=Automag, 
+                       8=Autococker, 9=PaintGren)
+    byte VictimWepNum (same set of values as KillerWepNum)
+    
+EVENT: LE_SUICIDE, 0x0a
+Occurs when a player eliminates themself (paint grenade, drowning, etc.)
+ARGUMENTS:
+    byte PlayerNum (the player that just killed themself)
+    
+EVENT: LE_FRIENDLYFIRE, 0x0b
+A player has eliminated one of their teammates.
+ARGUMENTS:
+    byte KillerPlayerNum (the player that just eliminated a teammate)
+    byte VictimPlayerNum (the player who was eliminated)
+    
+EVENT: LE_RESPAWN, 0x0c
+Occurs when a player respawns (that is, after they are killed and then the
+'elim' time passes, or after they entered the server while the round had
+already started).
+ARGUMENTS:
+    byte PlayerNum
+    
+EVENT: LE_FLAG_GRAB, 0x0d
+A player has grabbed another team's flag.
+ARGUMENTS:
+    byte PlayerNum
+
+EVENT: LE_FLAG_DROP, 0x0e
+A player has dropped all of their flag(s).
+ARGUMENTS:
+    byte PlayerNum
+    
+EVENT: LE_FLAG_CAPTURED, 0x0f
+A player has captured all of their held flag(s).
+ARGUMENTS:
+    byte PlayerNum
+    
+EVENT: LE_CHAT, 0x10
+A player has sent a chat message. Please note that it is not necessarily seen
+by everyone else. For example, ironmod commands won't usually be seen
+by other players in the game, or muted players will be unable to chat.
+However, their messages will still come through this event. As such, it prevents
+something of a security risk, as you may be logging not just usual
+player chatter, but private commands being run on the server. Bear this in mind.
+ARGUMENTS:
+    byte PlayerNum (the player who is sending the chat message)
+    byte WasTeamChat (1=team chat, 0=public chat)
+    cstring Message (the message this player sent)
+    
+EVENT: LE_MAP_CHANGE, 0x11
+A new map is about to load. This is practically right when it's loading.
+ARGUMENTS:
+    cstring MapName (the name of the map about to load)
+    
+EVENT: LE_GLS_IDENTIFIED, 0x12
+Occurs when the global login ID of a player has been found.
+ARGUMENTS:
+    byte PlayerNum (the player whose GBLID has been discovered)
+    uint32 GBLID (the player's discovered global login ID)
+    
+EVENT: LE_PLAYER_LOCATION, 0x13
+This event is to be emitted just before to following events:
+    LE_ADMINKILL, LE_KILL, LE_FRIENDLYFIRE, LE_SUICIDE
+For LE_ADMINKILL, you should send this event for the player that was killed.
+For LE_KILL/LE_FRIENDLYFIRE, you should send this event for both the victim
+and killer.
+For LE_SUICIDE, you should send this event for the suiciding player.
+The purpose of this event is to help provide the location of players at the
+time of their death (and at the time of their kills). This might prove useful
+for creating TF2-like "hotspot map" statistics.
+ARGUMENTS:
+    byte PlayerNum (the player whose position we are conveying)
+    float32 x (x-coordinate)
+    float32 y (y-coordinate)
+    float32 z (z-coordinate)    
+    
+EVENT: LE_CVAR, 0x014
+This event is emitted for only a certain subset of cvar values. This is because
+in the current implementation found in IronMod, it is impossible to detect
+variables arbitrarily. This event should take place at least once at the 
+start of the session (before the map loads). Afterwards, any updates made to
+the cvars should be sent using this same event. This even requires monitoring
+the cvars in GE_RUNFRAME to detect changes in their values. This allows for
+practically real-time notifications of their changes.
+The following is a list of cvars that will be updated (the ordering of them
+matters, and they will only be added to in future updates):
+    { "elim",
+      "fraglimit",
+      "timelimit",
+      "ffire",
+      "grenadeffire",
+      "ctfmode",
+      "sv_gravity",
+      "tripping",
+      "password",
+      "SmokeGrens",
+      "PaintGrens",
+      "flagcapendsround",
+      "gren_explodeonimpact",
+      "match",
+      "maxclients",
+      "real_ball_flight",
+      "ball_speed",
+      "sv_maxvelocity",
+      "ball_addplayerspeed",
+      "ball_life",
+      "slowballsbounce",
+      "bouncy",
+      "gren_addplayerspeed",
+      "pbgren_bursts",
+      "pbgren_ballsperburst",
+      "waterfriction",
+      "bounceback",
+      "instant_spawn",
+      "port",
+      "deathmatch",
+      "dedicated",
+      "maxrate",
+      "instant_item_spawn",
+      "maxentities",
+      "hostname",
+      "allow_match",
+      "public",
+      "website",
+      "admin",
+      "e-mail",
+      "location" }
+ARGUMENTS:
+    uint16 CvarIndex the 0-based index of the cvar
+    cstring Value the value of this cvar as a string
+    
+EVENT: LE_NAME_CHANGE, 0x15
+A player has changed their name.
+ARGUMENTS:
+    byte PlayerNum
+    cstring NewName
+    
+EVENT: LE_FATAL_ERROR, 0x16
+An error has taken place that may invalidate this session's statistics. This
+is likely due to an internal illegal state in the tracking mechanism for 
+players.
+ARGUMENTS:
+    cstring ErrorMsg a human-readable message indicating why this session may
+                     now be invalidated.

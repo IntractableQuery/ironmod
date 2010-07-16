@@ -1,0 +1,355 @@
+#LyX 1.5.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 276
+\begin_document
+\begin_header
+\textclass article
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\paperfontsize default
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Server administration plugin (standard)
+\end_layout
+
+\begin_layout Section
+Purpose
+\end_layout
+
+\begin_layout Paragraph*
+This plugin is not so much for dealing with everyday server tasks, as it
+ is for providing a facility to implement them in.
+ This plugin provides the following essential services:
+\end_layout
+
+\begin_layout Itemize
+Command management - ironmod has its own commands system for plugins.
+ This plugin is a central repository for all server commands, whether they
+ be for regular users or for server administrators.
+ It makes it easy to enforce access levels needed to use certain commands
+ and provide a standard interface for people to write their own commands.
+\end_layout
+
+\begin_layout Itemize
+User storage - ironmod has its own user system, where each user gets a short
+ little 
+\begin_inset Quotes eld
+\end_inset
+
+handle
+\begin_inset Quotes erd
+\end_inset
+
+ (name) and at the very least, an access level that determines how much
+ power they have.
+\end_layout
+
+\begin_layout Itemize
+User management - This plugin provides its own commands to manage users.
+\end_layout
+
+\begin_layout Itemize
+Temporary bans - Although somewhat trivial, this plugin provides standard
+ services for temporary bans (bans that are meant to expire in a very short
+ period of time, and which are safe to lose if the server restarts).
+ In addition, some useful time parsing is provided.
+ Long-term traditional banning is left to other plugins for implementation,
+ as there is a wide variety of criteria people might wish for bans, and
+ there's no sense trying to appease everyone here.
+\end_layout
+
+\begin_layout Paragraph*
+If you're familiar with Internet Relay Chat network services and the concept
+ of users and access levels needed to use commands, then you'll be right
+ at home.
+\end_layout
+
+\begin_layout Section
+Users 
+\end_layout
+
+\begin_layout Paragraph
+A user is represented by their 
+\begin_inset Quotes eld
+\end_inset
+
+user handle
+\begin_inset Quotes erd
+\end_inset
+
+, a lowercase name with only letters and the underscore (_) character.
+ A user usually has at the very least an access level.
+ Each user gets 
+\begin_inset Quotes eld
+\end_inset
+
+user settings
+\begin_inset Quotes erd
+\end_inset
+
+ which contain everything that we need to know about the user beside their
+ handle.
+ These settings are described later.
+\end_layout
+
+\begin_layout Subsection
+Access levels
+\end_layout
+
+\begin_layout Paragraph
+Access levels are given to users to determine what commands they can access
+ (commands may require a certain level of access before they can be used).
+ This is very much the same as Digital Paint's own 
+\begin_inset Quotes eld
+\end_inset
+
+commands.txt
+\begin_inset Quotes erd
+\end_inset
+
+ configuration file and 
+\begin_inset Quotes eld
+\end_inset
+
+login
+\begin_inset Quotes erd
+\end_inset
+
+ entries for people.
+ Access levels may also provide protection to users.
+ For example, most plugins that have commands that can do 
+\begin_inset Quotes eld
+\end_inset
+
+bad
+\begin_inset Quotes erd
+\end_inset
+
+ things like kicking people will not allow you to kick a player in the server
+ with a higher access level than you.
+ Access levels range from 0 to 500.
+ Here is the guide you should follow for assigning access levels to users:
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Access level 0:
+\emph default
+ 
+\emph on
+Regular user.
+
+\emph default
+ This is the default access level for anyone in the server, you do not even
+ need to have an entry in the server's user list to receive it.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Access level 1 to 99: VIP user
+\emph default
+.
+ This is for non-administrators that may get special priviledges on the
+ server.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Access level 100 to 199: Junior administrator
+\emph default
+.
+ This is a low-level administrator, perhaps on trial.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Access level 200 to 299: Regular administrator
+\emph default
+.
+ This is the most common of administrator access levels.
+ Mostly any plugin that exposes commands for administrators to use should
+ and will use this access level (200).
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Access level 300 to 399: Senior administrator
+\emph default
+.
+ This user is considered highly trustworthy and can add/remove other users,
+ but can not look at another user's settings (the 
+\begin_inset Quotes eld
+\end_inset
+
+usersettings
+\begin_inset Quotes erd
+\end_inset
+
+ command) or set their own user settings manually (using 
+\begin_inset Quotes eld
+\end_inset
+
+set
+\begin_inset Quotes erd
+\end_inset
+
+ on themselves).
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Access level 400 to 499: Server operator
+\emph default
+.
+ This user can do practically anything, including looking at the settings
+ for other users and setting their own user settings (so they can give themselve
+s more access if they want).
+ This user is assumed to be in complete control of the server itself, anyway.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Access level 500: Server owner
+\emph default
+.
+ This is reserved for the server owner(s).
+\end_layout
+
+\begin_layout Subsection
+User settings
+\end_layout
+
+\begin_layout Paragraph
+Each user has settings associated with their user handle.
+ This plugin manages these settings and allows them to be modified directly
+ by a server administrator (using the 
+\begin_inset Quotes eld
+\end_inset
+
+set
+\begin_inset Quotes erd
+\end_inset
+
+ command), although some of them may be controlled using other commands
+ to.
+ The purpose of this section is to list all of the settings that are used
+ by this plugin.
+ Be aware that although discouraged, other plugins can modify a user's settings
+ (and even add new ones).
+ Settings are simply key-value pairs.
+ Here are the ones used by this plugin:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+access
+\begin_inset Quotes erd
+\end_inset
+
+ - This is the user's access level.
+ It is highly discouraged that you use 
+\begin_inset Quotes eld
+\end_inset
+
+set
+\begin_inset Quotes erd
+\end_inset
+
+ to modify this.
+ Removing this setting from a user may result in random errors from this
+ plugin.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+gblid
+\begin_inset Quotes erd
+\end_inset
+
+ - This is a Digital Paint Global Login ID to recognize this user by.
+ If a player is found to have this ID, they will automatically be recognized
+ as this user.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+cloak
+\begin_inset Quotes erd
+\end_inset
+
+ - This is primarily to hide this user from informational command output,
+ such as the 
+\begin_inset Quotes eld
+\end_inset
+
+users
+\begin_inset Quotes erd
+\end_inset
+
+ command.
+ It does not guarantee complete invisibility though, since people can still
+ guess your user handle and use something such as the 
+\begin_inset Quotes eld
+\end_inset
+
+access
+\begin_inset Quotes erd
+\end_inset
+
+ command to discover you.
+\end_layout
+
+\begin_layout Section
+Temporary bans
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\end_body
+\end_document

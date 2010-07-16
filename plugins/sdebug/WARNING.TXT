@@ -1,0 +1,2 @@
+Do not remove this plugin. It is required for the execution of IronMod 
+and other plugins may rely on it.

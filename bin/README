@@ -1,0 +1,7 @@
+I've created this folder especially for storage of the custom game library that you will need to use.
+
+First, rename your pball/ "gamei386.so" to "original_gamelib.so"
+
+Then, copy the "gamei386.so" found here to your pball/ path.  It will automatically load "original_gamelib.so".
+
+Note: I have not worked on ironmod since early 2009 at best.  It may not work anymore.

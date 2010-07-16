@@ -1,0 +1,10 @@
+[18:12:11] sdfdsffdsfsd connected [192.168.0.6:10694]
+[18:12:15] sdfdsffdsfsd connected [192.168.0.6:10694]
+PANIC: unprotected error in call to Lua API (.../paintball2/ironmod/plugins/server/plugin_server.lua:1348: expected player_num_cache to have a value)
+note: if you can't fix this, or want a more solid method, you could just
+use "sv players" for this also :)
+note: it looks like this ALWAYS happens if you connect to localhost...? probably a speed issue
+note: it happens sometimes over lan if you let it keep connecting, then suddenly start the server
+
+remember that clients can reconnect... dunno if this matters for anything
+
