@@ -17,8 +17,8 @@ Jitspoe maintains his own cheat detection system.  I don't keep up much with wha
 You can assume the code is offered under GPLv3.  Note that there are some libraries in lib/ that are not mine and may have their own terms of use.
 
 == General folder information
-plugins/ - a location for plugins storage (does not necessarily always get used, as it can be changed)
-core/ - standard ironmod-specific lua scripts
-lib/ - platform-dependent dll/so files which may be loaded by scripts (Lua script note: this directory becomes a package.cpath directory)
-plugins/ - plugins directory
-bin/ - You'll need the library and instructions here if you want to try to use ironmod
+* plugins/ - a location for plugins storage (does not necessarily always get used, as it can be changed)
+* core/ - standard ironmod-specific lua scripts
+* lib/ - platform-dependent dll/so files which may be loaded by scripts (Lua script note: this directory becomes a package.cpath directory)
+* plugins/ - plugins directory
+* bin/ - You'll need the library and instructions here if you want to try to use ironmod
