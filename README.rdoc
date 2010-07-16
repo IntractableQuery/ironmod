@@ -13,7 +13,10 @@ IronMod was fun to develop and was my first major C/Lua project.  That said, it 
 == A word of warning
 Jitspoe maintains his own cheat detection system.  I don't keep up much with what's going on with that, but he may decide to have servers report themselves if they are running modified game libraries (unlikely, though).  Don't blame me if you get banned.  Also, please don't use ironmod to make jump servers :)
 
-General folder information:
+== License
+You can assume the code is offered under GPLv3.  Note that there are some libraries in lib/ that are not mine and may have their own terms of use.
+
+== General folder information
 plugins/ - a location for plugins storage (does not necessarily always get used, as it can be changed)
 core/ - standard ironmod-specific lua scripts
 lib/ - platform-dependent dll/so files which may be loaded by scripts (Lua script note: this directory becomes a package.cpath directory)
