@@ -1,7 +1,7 @@
 == About
 IronMod is a server-side modification for the game {Digital Paint 2.0}[http://dplogin.com/]. It allows modification of the server's behavior using the Lua scripting language, which is arguably one of the {lightest and fastest}[http://shootout.alioth.debian.org/gp4/benchmark.php?test=all&lang=all] scripting languages available at this time. IronMod's way of allowing server modification is extremely similar to that of {Metamod}[http://metamod.org/], since source code for the server logic is unavailable.  Its use of Lua ensures that plugins (that is, server extensions) are portable, standardized, and supported by a standard Lua library dedicated to the server's functionality.
 
-Digital Paint uses a heavily modified Quake 2 engine. Because of this, it inherits the old behavior of loading server-based logic externally (it happens that this code is not released publically, so it is not trivial to modify its behavior and integrate scripting directly). IronMod simply takes the place of this "external logic" (the game library) and serves as a proxy between the game engine and the actual game library. Because of this, it can watch and modify what goes on between them. This is not the ideal way to provide extended functionality, but it does not require any modification to either the game engine or game library.
+Digital Paint uses a heavily modified Quake 2 engine. Because of this, it inherits the old behavior of loading server-based logic externally (it happens that this code is not released publicly, so it is not trivial to modify its behavior and integrate scripting directly). IronMod simply takes the place of this "external logic" (the game library) and serves as a proxy between the game engine and the actual game library. Because of this, it can watch and modify what goes on between them. This is not the ideal way to provide extended functionality, but it does not require any modification to either the game engine or game library.
 
 IronMod is meant for augmenting server functionality, not replacing it. Its strength is player command processing, game event listening, and player state tracking.
 
@@ -12,18 +12,18 @@ IronMod has two components:
 
 As an added bonus, you will find an SNTP client implementation in lib/luasntp.
 
-This was built and tested on a 32-bit Linux configuration.
+This was built and tested on a 32-bit Linux configuration using gcc.
 
 == Why the project is dead
-IronMod was fun to develop and was my first major C/Lua project.  That said, it is not a legitimate way to expand on DP's functionality.  Yes, it has a lot of powerful and useful features that could benefit DP hugely, but it replicates a lot of game logic that is hidden away in DP's own game library (e.g. gamei386.so) and has numerous hacks to get around limitations I cannot control.  Jitspoe (DP's sole developer) has elected to keep this code closed-source, claiming that parts of it are copyrighted by people he can't contact anymore (either that, or it's still assumed to be under the terms of the pre-GPL Quake 2 mod base, which is questionable given use of the new shared headers).  In short, it's hard to create a community-targeted project like this without a game code base that is open to the community to begin with.
+IronMod was fun to develop and was my first major C/Lua project.  That being said, it is not a legitimate way to expand on DP's functionality.  Yes, it has a lot of powerful and useful features that could benefit DP hugely, but it replicates a lot of game logic that is hidden away in DP's own game library (e.g. gamei386.so) and has numerous hacks to get around limitations I cannot control.  Jitspoe (DP's sole developer) has elected to keep this code closed-source, claiming that parts of it are copyrighted by people he can't contact anymore (either that, or it's still assumed to be under the terms of the pre-GPL Quake 2 mod base, which is questionable given use of the new shared headers).  In short, it's hard to create a community-targeted project like this without a game code base that is open to the community to begin with.
 
-In any case, IronMod became far too difficult to debug.  It did turn up some bugs in DP, which were fun to find and report (or in many cases, fix using Lua alone), but it is simply not worth the time investment to do something that would be far easier to do with Jitspoe's support.  As it is, the code is here for you to learn from.  {Natural Selection 2}[http://www.unknownworlds.com/ns2/]'s use of Lua really inspired me, and I hope to see Lua used in more games in the future, especially with great projects like Lua JIT. 
+In any case, IronMod became far too difficult to debug.  It did turn up some bugs in DP, which were fun to find and report (or in many cases, fix using Lua alone), but it is simply not worth the time investment to do something that would be far easier to do with Jitspoe's support.  As it is, the code is here for you to learn from.  {Natural Selection 2's}[http://www.unknownworlds.com/ns2/] use of Lua really inspired me, and I hope to see Lua used in more games in the future, especially with great projects like Lua JIT. 
 
 == Compatibility
 I believe I last developed this on DP alpha build 26.  Naturally, it may stop working entirely in the future.
 
 == A word of warning
-Jitspoe maintains his own cheat detection system.  As of DP alpha build 30, I have no reason to believe this runs on anything other than the client and I have not witnessed it checking gamex86 for modification.  You've been warned!
+Jitspoe maintains his own cheat detection system.  As of DP alpha build 30, I have no reason to believe this runs on anything other than the client and I have not witnessed it checking gamex86/gamei386 for modification.  However, you've been warned!
 
 == License
 You can assume the code is offered under GPLv3.  Note that there are some libraries in lib/ that are not mine and may have their own terms of use.
